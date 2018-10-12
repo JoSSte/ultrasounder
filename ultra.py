@@ -1,5 +1,6 @@
 #! /usr/bin/python
 import time
+import datetime
 import RPi.GPIO as GPIO
 
 GPIO.setmode(GPIO.BOARD)
@@ -15,6 +16,11 @@ def deviation(x,y):
 	avg = (float(x)+float(y))/2
 	#print "AVG: " + str(avg)
 	return (diff/avg)
+
+def saveData(value):
+	f=open("output/distances.csv","a")
+	f.write(str(value) + ",\"" + str(datetime.datetime.fromtimestamp(time.time()).strftime('%y-%m-%d %H:%M:%S')) + "\"\n")
+	f.close()
 
 
 
@@ -33,7 +39,7 @@ while 1:
         GPIO.output(11, 0)
 
         GPIO.setup(11, GPIO.IN)
-        
+
         goodread=True
         watchtime=time.time()
         while GPIO.input(11)==0 and goodread:
@@ -47,7 +53,7 @@ while 1:
                         endtime=time.time()
                         if (endtime-watchtime > timeout):
                                 goodread=False
-        
+
         if goodread:
                 duration = endtime-starttime
                 distance = int(round(duration*34000/2))
@@ -57,4 +63,5 @@ while 1:
 			#print "DEV: " + str(dev)
 			lastread = distance
 			if (dev > allowableError):
-				print distance
+				saveData(distance)
+				print str(distance) + "," + str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
