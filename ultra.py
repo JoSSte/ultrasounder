@@ -5,6 +5,18 @@ import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
 timeout = 0.020
+lastread = 0
+allowableError = 0.05
+
+
+def deviation(x,y):
+	diff = abs(float(x)-float(y))
+	#print "Diff: " + str(diff)
+	avg = (float(x)+float(y))/2
+	#print "AVG: " + str(avg)
+	return (diff/avg)
+
+
 
 while 1:
         GPIO.setup(11, GPIO.OUT)
@@ -37,6 +49,12 @@ while 1:
                                 goodread=False
         
         if goodread:
-                duration=endtime-starttime
-                distance=int(round(duration*34000/2))
-                print distance
+                duration = endtime-starttime
+                distance = int(round(duration*34000/2))
+                if (distance != lastread):
+			#print "D: " + str(distance) + " L: " + str(lastread)
+			dev = deviation(lastread,distance)
+			#print "DEV: " + str(dev)
+			lastread = distance
+			if (dev > allowableError):
+				print distance
