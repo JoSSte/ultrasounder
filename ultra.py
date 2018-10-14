@@ -61,7 +61,8 @@ while 1:
 			#print "D: " + str(distance) + " L: " + str(lastread)
 			dev = deviation(lastread,distance)
 			#print "DEV: " + str(dev)
-			lastread = distance
 			if (dev > allowableError):
+				#save last entry, only if deviation is big enough.
+				lastread = distance
 				saveData(distance)
 				print str(distance) + "," + str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
