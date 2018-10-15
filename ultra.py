@@ -5,11 +5,21 @@ import RPi.GPIO as GPIO
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
+#log file to write to
+outputFile = "output/distances.csv"
 timeout = 0.020
+#variable to hold last value read
 lastread = 0
-allowableError = 0.05
+#maximum allowable error percentage. deviations of less than this are ignored
+allowableError = 0.15
+#read interval in seconds
+readInterval = 20
+#pin number
+pinNumber = 11
 
 
+
+#function to calculate deviation between current and previously read value
 def deviation(x,y):
 	diff = abs(float(x)-float(y))
 	#print "Diff: " + str(diff)
@@ -17,39 +27,40 @@ def deviation(x,y):
 	#print "AVG: " + str(avg)
 	return (diff/avg)
 
+#function to save data
 def saveData(value):
-	f=open("output/distances.csv","a")
+	f=open(outputFile,"a")
 	f.write(str(value) + ",\"" + str(datetime.datetime.fromtimestamp(time.time()).strftime('%y-%m-%d %H:%M:%S')) + "\"\n")
 	f.close()
 
 
 
 while 1:
-        GPIO.setup(11, GPIO.OUT)
+        GPIO.setup(pinNumber, GPIO.OUT)
         #cleanup output
-        GPIO.output(11, 0)
+        GPIO.output(pinNumber, 0)
 
         time.sleep(0.000002)
 
         #send signal
-        GPIO.output(11, 1)
+        GPIO.output(pinNumber, 1)
 
-        time.sleep(0.5)
+        time.sleep(readInterval)
 
-        GPIO.output(11, 0)
+        GPIO.output(pinNumber, 0)
 
-        GPIO.setup(11, GPIO.IN)
+        GPIO.setup(pinNumber, GPIO.IN)
 
         goodread=True
         watchtime=time.time()
-        while GPIO.input(11)==0 and goodread:
+        while GPIO.input(pinNumber)==0 and goodread:
                 starttime=time.time()
                 if (starttime-watchtime > timeout):
                         goodread=False
 
         if goodread:
                 watchtime=time.time()
-                while GPIO.input(11)==1 and goodread:
+                while GPIO.input(pinNumber)==1 and goodread:
                         endtime=time.time()
                         if (endtime-watchtime > timeout):
                                 goodread=False
@@ -65,4 +76,4 @@ while 1:
 				#save last entry, only if deviation is big enough.
 				lastread = distance
 				saveData(distance)
-				print str(distance) + "," + str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
+				print str(distance) + "\t\t" + str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
