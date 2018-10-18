@@ -12,8 +12,9 @@ timeout = 0.020
 lastread = 0
 #maximum allowable error percentage. deviations of less than this are ignored
 allowableError = 0.15
+maxAllowableError = 100
 #read interval in seconds
-readInterval = 20
+readInterval = 2
 #pin number
 pinNumber = 11
 
@@ -72,7 +73,7 @@ while 1:
 			#print "D: " + str(distance) + " L: " + str(lastread)
 			dev = deviation(lastread,distance)
 			#print "DEV: " + str(dev)
-			if (dev > allowableError):
+			if (dev > allowableError and dev < maxAllowableError):
 				#save last entry, only if deviation is big enough.
 				lastread = distance
 				saveData(distance)
