@@ -2,6 +2,7 @@
 import time
 import datetime
 import RPi.GPIO as GPIO
+import mysql.connector
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
@@ -12,12 +13,17 @@ timeout = 0.020
 lastread = 0
 #maximum allowable error percentage. deviations of less than this are ignored
 allowableError = 0.15
-maxAllowableError = 100
+maxDistance = 200
 #read interval in seconds
 readInterval = 2
 #pin number
 pinNumber = 11
-
+#setup MySQL Connection
+mydb = mysql.connector.connect(
+  host="trausti.local.stumph.dk",
+  user="sensorpi",
+  passwd="A23Very43Secret92Password!"
+)
 
 
 #function to calculate deviation between current and previously read value
@@ -28,11 +34,22 @@ def deviation(x,y):
 	#print "AVG: " + str(avg)
 	return (diff/avg)
 
+def getTimeStamp():
+	return str(datetime.datetime.fromtimestamp(time.time()).strftime('%y-%m-%d %H:%M:%S'));
+
 #function to save data
-def saveData(value):
+def saveDataCSV(value):
 	f=open(outputFile,"a")
-	f.write(str(value) + ",\"" + str(datetime.datetime.fromtimestamp(time.time()).strftime('%y-%m-%d %H:%M:%S')) + "\"\n")
+	f.write(str(value) + ",\"" + getTimeStamp() + "\"\n")
 	f.close()
+
+def saveDataDB(value):
+	mycursor = mydb.cursor()
+	sql = "INSERT INTO distance (value, time) VALUES (%s, %s)"
+	val = (value, getTimeStamp())
+	mycursor.execute(sql, val)
+	mydb.commit()
+	print(mycursor.rowcount, "record inserted.")
 
 
 
@@ -73,7 +90,7 @@ while 1:
 			#print "D: " + str(distance) + " L: " + str(lastread)
 			dev = deviation(lastread,distance)
 			#print "DEV: " + str(dev)
-			if (dev > allowableError and dev < maxAllowableError):
+			if (dev > allowableError and distance < maxDistance):
 				#save last entry, only if deviation is big enough.
 				lastread = distance
 				saveData(distance)
