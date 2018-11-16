@@ -36,45 +36,45 @@ def saveData(value):
 
 
 
-while 1:
-        GPIO.setup(pinNumber, GPIO.OUT)
-        #cleanup output
-        GPIO.output(pinNumber, 0)
 
-        time.sleep(0.000002)
+GPIO.setup(pinNumber, GPIO.OUT)
+#cleanup output
+GPIO.output(pinNumber, 0)
 
-        #send signal
-        GPIO.output(pinNumber, 1)
+time.sleep(0.000002)
 
-        time.sleep(readInterval)
+#send signal
+GPIO.output(pinNumber, 1)
 
-        GPIO.output(pinNumber, 0)
+#time.sleep(readInterval)
 
-        GPIO.setup(pinNumber, GPIO.IN)
+GPIO.output(pinNumber, 0)
 
-        goodread=True
+GPIO.setup(pinNumber, GPIO.IN)
+
+goodread=True
+watchtime=time.time()
+while GPIO.input(pinNumber)==0 and goodread:
+        starttime=time.time()
+        if (starttime-watchtime > timeout):
+                goodread=False
+
+if goodread:
         watchtime=time.time()
-        while GPIO.input(pinNumber)==0 and goodread:
-                starttime=time.time()
-                if (starttime-watchtime > timeout):
+        while GPIO.input(pinNumber)==1 and goodread:
+                endtime=time.time()
+                if (endtime-watchtime > timeout):
                         goodread=False
 
-        if goodread:
-                watchtime=time.time()
-                while GPIO.input(pinNumber)==1 and goodread:
-                        endtime=time.time()
-                        if (endtime-watchtime > timeout):
-                                goodread=False
-
-        if goodread:
-                duration = endtime-starttime
-                distance = int(round(duration*34000/2))
-                if (distance != lastread):
-			#print "D: " + str(distance) + " L: " + str(lastread)
-			dev = deviation(lastread,distance)
-			#print "DEV: " + str(dev)
-			if (dev > allowableError and dev < maxAllowableError):
-				#save last entry, only if deviation is big enough.
-				lastread = distance
-				saveData(distance)
-				print str(distance) + "\t\t" + str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
+if goodread:
+        duration = endtime-starttime
+        distance = int(round(duration*34000/2))
+        if (distance != lastread):
+	#print "D: " + str(distance) + " L: " + str(lastread)
+	dev = deviation(lastread,distance)
+	#print "DEV: " + str(dev)
+	if (dev > allowableError and dev < maxAllowableError):
+		#save last entry, only if deviation is big enough.
+		lastread = distance
+		saveData(distance)
+		print str(distance) + "\t\t" + str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
