@@ -43,9 +43,9 @@ def saveDataCSV(value):
 	f.write(str(value) + ",\"" + getTimeStamp() + "\"\n")
 	f.close()
 
-def saveDataDB(value):
+def saveData(value):
 	mycursor = mydb.cursor()
-	sql = "INSERT INTO distance (value, time) VALUES (%s, %s)"
+	sql = "INSERT INTO sensorpi.rawData (sensorvalue, time) VALUES (%s, %s)"
 	val = (value, getTimeStamp())
 	mycursor.execute(sql, val)
 	mydb.commit()
@@ -86,12 +86,12 @@ if goodread:
 if goodread:
         duration = endtime-starttime
         distance = int(round(duration*34000/2))
-        if (distance != lastread):
+        #if (distance != lastread):
 	#print "D: " + str(distance) + " L: " + str(lastread)
-	dev = deviation(lastread,distance)
+	#dev = deviation(lastread,distance)
 	#print "DEV: " + str(dev)
-	if (dev > allowableError and distance < maxDistance):
-		#save last entry, only if deviation is big enough.
-		lastread = distance
-		saveData(distance)
-		print str(distance) + "\t\t" + str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
+	#if (dev > allowableError and distance < maxDistance):
+	#save last entry, only if deviation is big enough.
+	lastread = distance
+	saveData(distance)
+	print str(distance) + "\t\t" + str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
