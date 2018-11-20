@@ -103,7 +103,7 @@ function read_db() {
 
     $data = array();
     //$qry = "SELECT * FROM sensorpi.summary";
-    $qry = "SELECT (75-round(avg(sensorValue),0)) as Value, Time FROM sensorpi.rawData GROUP BY UNIX_TIMESTAMP(time) DIV 3600 ORDER BY time asc";
+    $qry = "SELECT (75-round(avg(sensorValue),0)) as Value, Time FROM sensorpi.rawData GROUP BY UNIX_TIMESTAMP(time) DIV 10800 ORDER BY time asc";
     $res = $db->query($qry, PDO::FETCH_ASSOC);
     foreach ($res as $row) {
         $data[] = $row;
