@@ -30,118 +30,147 @@
     <div style="width:90%;margin: auto;">
         <canvas id="pilleChart"></canvas>
     </div>
+    <select name="interval" id="interval">
+        <option value="3600">1 Time</option>
+        <option value="7200">2 Timer</option>
+        <option value="10800" selected>3 Timer</option>
+    </select>
+    <input type="button" value="Opdater kort" onclick="updateChartData()">
 
     <script>
-        var lowestLevel = 16.5;
-        window.chartColors = {
-            red: 'rgb(255,  99, 132)',
-            orange: 'rgb(255, 159,  64)',
-            yellow: 'rgb(255, 205,  86)',
-            green: 'rgb( 75, 192, 192)',
-            blue: 'rgb( 54, 162, 235)',
-            purple: 'rgb(153, 102, 255)',
-            grey: 'rgb(231, 233, 237)',
-            black: 'rgb(  0,   0,   0)',
-            graphite: 'rgb( 50,  50,  50)'
-        };
+    var data = [];
+    var labels = [];
+    var pilleChart;
+    var interval = 10800;
+    var lowestLevel = 15;
+    window.chartColors = {
+      red: 'rgb(255,  99, 132)',
+      orange: 'rgb(255, 159,  64)',
+      yellow: 'rgb(255, 205,  86)',
+      green: 'rgb( 75, 192, 192)',
+      blue: 'rgb( 54, 162, 235)',
+      purple: 'rgb(153, 102, 255)',
+      grey: 'rgb(231, 233, 237)',
+      black: 'rgb(  0,   0,   0)',
+      graphite: 'rgb( 50,  50,  50)'
+    };
 
-        function drawLineChart() {
+    function splitData(jsonData) {
+      console.log("splitting data for interval " + interval);
+      // Split timestamp and data into separate arrays
+      labels = [],
+      data = [];
+      jsonData.forEach(function (packet) {
+        labels.push(new Date(packet.Time));
+        data.push(parseFloat(packet.Value));
+      });
+    }
 
-            // Add a helper to format timestamp data
-            Date.prototype.formatMMDDYYYY = function () {
-                return (this.getMonth() + 1) +
-                    "/" + this.getDate() +
-                    "/" + this.getFullYear() +
-                    " " + this.getHours() + ":00";
+    function updateChartData() {
+      var intval = document.getElementById("interval").value;
+      if (interval != intval) {
+        console.log("Updating interval from " + interval + " to " + intval);
+        interval = intval;
+      }
+      var jsonData = $.ajax({
+          url: 'index.php?jsonaction=piller&interval=' + interval,
+          dataType: 'json',
+        }).done(function (newData) {
+          splitData(newData);
+          console.log("updating dataset ["+ pilleChart.data.datasets[0].data.length + "|" + data.length + "]");
+          pilleChart.data.datasets[0].data = data;
+          pilleChart.data.datasets[0].labels = labels;
+          console.log("updating chart");
+          pilleChart.update();
+        });
+
+    }
+
+    function drawLineChart() {
+
+      var jsonData = $.ajax({
+          url: 'index.php?jsonaction=piller&interval=' + interval,
+          dataType: 'json',
+        }).done(function (rawData) {
+          splitData(rawData);
+
+          // Create the chart.js data structure using 'labels' and 'data'
+          var pilleData = {
+            labels: labels,
+            datasets: [{
+                fillColor: "rgba(151,187,205,0.2)",
+                strokeColor: window.chartColors.blue,
+                /*pointColor: "rgba(151,187,205,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(151,187,205,1)",*/
+                borderColor: window.chartColors.graphite,
+                borderWidth: 1,
+                fill: false,
+                label: 'Pilleniveau',
+                data: data
+
+              }
+            ]
+          };
+          var options = {
+            showLines: true,
+            responsive: true,
+            title: {
+              display: true,
+              text: 'Pilleniveau i beholder'
+            },
+            legend: {
+              display: false
+            },
+            tooltips: {
+              mode: 'index',
+              intersect: true
+            },
+            annotation: {
+              annotations: [{
+                  type: 'line',
+                  mode: 'horizontal',
+                  scaleID: 'y-axis-0',
+                  value: lowestLevel,
+                  borderColor: window.chartColors.red,
+                  borderWidth: 2,
+                  label: {
+                    enabled: false,
+                    content: 'Test label'
+                  }
+                }
+              ]
+            },
+            scales: {
+              yAxes: [{
+                  ticks: {
+                    beginAtZero: true
+                  }
+                }
+              ],
+              //Set X-Axis to date instead of labels
+              xAxes: [{
+                  type: 'time',
+                  time: {
+                    unit: 'day'
+                  }
+                }
+              ]
             }
-
-            var jsonData = $.ajax({
-                url: 'index.php?jsonaction=piller',
-                dataType: 'json',
-            }).done(function (results) {
-
-                // Split timestamp and data into separate arrays
-                var labels = [], data = [];
-                results.forEach(function (packet) {
-                    labels.push(new Date(packet.Time).formatMMDDYYYY());
-                    data.push(parseFloat(packet.Value));
-                });
-
-                // Create the chart.js data structure using 'labels' and 'data'
-                var pilleData = {
-                    labels: labels,
-                    datasets: [{
-                        fillColor: "rgba(151,187,205,0.2)",
-                        strokeColor: window.chartColors.blue,
-                        /*pointColor: "rgba(151,187,205,1)",
-                        pointStrokeColor: "#fff",
-                        pointHighlightFill: "#fff",
-                        pointHighlightStroke: "rgba(151,187,205,1)",*/
-                        borderColor: window.chartColors.graphite,
-                        borderWidth: 1,
-                        fill: false,
-                        label: 'Pilleniveau',
-                        data: data
-
-                    }]
-                };
-                var options = {
-                    showLines: true,
-                    responsive: true,
-                    title: {
-                        display: true,
-                        text: 'Pilleniveau i beholder'
-                    },
-                    legend: {
-                        display: false
-                    },
-                    tooltips: {
-                        mode: 'index',
-                        intersect: true
-                    },
-                    annotation: {
-                        annotations: [{
-                            type: 'line',
-                            mode: 'horizontal',
-                            scaleID: 'y-axis-0',
-                            value: lowestLevel,
-                            borderColor: window.chartColors.red,
-                            borderWidth: 2,
-                            label: {
-                                enabled: false,
-                                content: 'Test label'
-                            }
-                        }]
-                    },
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true
-                            }
-                        }],
-                        //Set X-Axis to date instead of labels
-                        xAxes: [{
-                            type: 'time',
-                            time: {
-                                unit: 'day'
-                                }
-                        }]
-                    }
-                };
-
-                var ctx = document.getElementById("pilleChart").getContext("2d");
-                // Instantiate a new chart
-                var pilleChart = new Chart(ctx, {
-                    type: 'line',
-                    data: pilleData,
-                    options: options
-                });
+          }
+          var ctx = document.getElementById("pilleChart").getContext("2d");
+          // Instantiate a new chart
+          pilleChart = new Chart(ctx, {
+              type: 'line',
+              data: pilleData,
+              options: options
             });
-        }
+        });
+    }
 
-        drawLineChart();
-
-    </script>
+    drawLineChart();
+</script>
 </body>
 
 </html>

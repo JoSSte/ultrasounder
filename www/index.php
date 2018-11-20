@@ -4,6 +4,8 @@ error_reporting(E_ALL);
 if (!ini_get('display_errors')) {
     ini_set('display_errors', '1');
 }
+
+define("DEFAULT_INTERVAL",10800);
 //Path to CSV
 $csvfile = "/var/www/sensors/data/distances.csv";
 //DB connection
@@ -15,7 +17,9 @@ if (sizeof($_GET) > 0) {
         switch ($jsonaction) {
             case "piller":
                 header("content-type: application/json");
-                echo json_encode(read_db());
+                $interval = filter_input(INPUT_GET, "interval", FILTER_VALIDATE_INT, array("options" => array(    "default" => DEFAULT_INTERVAL,    "min_range" => 3600)));
+                
+                echo json_encode(read_db($interval));
                 exit(0);
             default:
                 echo json_encode("invalid action");
@@ -98,12 +102,12 @@ function read_csv() {
     return $data;
 }
 
-function read_db() {
+function read_db($default_interval = DEFAULT_INTERVAL) {
     global $db;
 
     $data = array();
     //$qry = "SELECT * FROM sensorpi.summary";
-    $qry = "SELECT (75-round(avg(sensorValue),0)) as Value, Time FROM sensorpi.rawData GROUP BY UNIX_TIMESTAMP(time) DIV 10800 ORDER BY time asc";
+    $qry = "SELECT (75-round(avg(sensorValue),0)) as Value, Time FROM sensorpi.rawData GROUP BY UNIX_TIMESTAMP(time) DIV $default_interval ORDER BY time asc";
     $res = $db->query($qry, PDO::FETCH_ASSOC);
     foreach ($res as $row) {
         $data[] = $row;
