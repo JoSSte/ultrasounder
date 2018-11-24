@@ -5,7 +5,7 @@ if (!ini_get('display_errors')) {
     ini_set('display_errors', '1');
 }
 
-define("DEFAULT_INTERVAL",10800);
+define("DEFAULT_INTERVAL",3600);
 //Path to CSV
 $csvfile = "/var/www/sensors/data/distances.csv";
 //DB connection
@@ -17,7 +17,7 @@ if (sizeof($_GET) > 0) {
         switch ($jsonaction) {
             case "piller":
                 header("content-type: application/json");
-                $interval = filter_input(INPUT_GET, "interval", FILTER_VALIDATE_INT, array("options" => array(    "default" => DEFAULT_INTERVAL,    "min_range" => 3600)));
+                $interval = filter_input(INPUT_GET, "interval", FILTER_VALIDATE_INT, array("options" => array(    "default" => DEFAULT_INTERVAL,    "min_range" => 600)));// 10 minute minimum
                 
                 echo json_encode(read_db($interval));
                 exit(0);

@@ -1,15 +1,7 @@
-<?php
-
-// sensorpi.rawData to sensorread@localhost identified by '12345trewq'
-
-// http://www.chartjs.org/docs/latest/
-// http://microbuilder.io/blog/2016/01/10/plotting-json-data-with-chart-js.html
-// https://codepen.io/jordanwillis/pen/qrXJLW
-
-?>
 <!doctype html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Pille Historik</title>
     <link rel="icon" type="image/png" href="/pellets.png" />
     <style>
@@ -31,18 +23,32 @@
         <canvas id="pilleChart"></canvas>
     </div>
     <select name="interval" id="interval">
+        <option value="600">10 Minutter</option>
+        <option value="900">15 Minutter</option>
+        <option value="1800">½ Time</option>
         <option value="3600">1 Time</option>
         <option value="7200">2 Timer</option>
-        <option value="10800" selected>3 Timer</option>
+        <option value="10800">3 Timer</option>
     </select>
     <input type="button" value="Opdater kort" onclick="updateChartData()">
 
     <script>
+    function selectItemByValue(elmnt, value){
+      for(var i=0; i < elmnt.options.length; i++){
+        if(elmnt.options[i].value === value) {
+          elmnt.selectedIndex = i;
+          break;
+        }
+      }
+    }
+    
+    
     var data = [];
     var labels = [];
     var pilleChart;
-    var interval = 10800;
-    var lowestLevel = 15;
+    var interval = 3600;
+    $("#interval").val(interval);
+    var warningLevel = 14;
     window.chartColors = {
       red: 'rgb(255,  99, 132)',
       orange: 'rgb(255, 159,  64)',
@@ -56,7 +62,6 @@
     };
 
     function splitData(jsonData) {
-      console.log("splitting data for interval " + interval);
       // Split timestamp and data into separate arrays
       labels = [],
       data = [];
@@ -77,10 +82,8 @@
           dataType: 'json',
         }).done(function (newData) {
           splitData(newData);
-          console.log("updating dataset ["+ pilleChart.data.datasets[0].data.length + "|" + data.length + "]");
           pilleChart.data.datasets[0].data = data;
-          pilleChart.data.datasets[0].labels = labels;
-          console.log("updating chart");
+          pilleChart.config.data.labels = labels;
           pilleChart.update();
         });
 
@@ -100,10 +103,6 @@
             datasets: [{
                 fillColor: "rgba(151,187,205,0.2)",
                 strokeColor: window.chartColors.blue,
-                /*pointColor: "rgba(151,187,205,1)",
-                pointStrokeColor: "#fff",
-                pointHighlightFill: "#fff",
-                pointHighlightStroke: "rgba(151,187,205,1)",*/
                 borderColor: window.chartColors.graphite,
                 borderWidth: 1,
                 fill: false,
@@ -132,9 +131,9 @@
                   type: 'line',
                   mode: 'horizontal',
                   scaleID: 'y-axis-0',
-                  value: lowestLevel,
+                  value: warningLevel,
                   borderColor: window.chartColors.red,
-                  borderWidth: 2,
+                  borderWidth: 1.5,
                   label: {
                     enabled: false,
                     content: 'Test label'
