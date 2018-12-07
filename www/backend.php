@@ -18,7 +18,6 @@ if (sizeof($_GET) > 0) {
             case "piller":
                 header("content-type: application/json");
                 $interval = filter_input(INPUT_GET, "interval", FILTER_VALIDATE_INT, array("options" => array(    "default" => DEFAULT_INTERVAL,    "min_range" => 600)));// 10 minute minimum
-                
                 echo json_encode(read_db($interval));
                 exit(0);
             default:
@@ -41,7 +40,7 @@ if (sizeof($_GET) > 0) {
         <br>
         <a href="<?= $_SERVER["PHP_SELF"] ?>?action=dump">Dump Data</a>
         <br>
-        <a href="/chart.html">Chart</a>
+        <a href="/index.html">Chart</a>
         <pre>
 <?php
 if (sizeof($_GET) > 0) {
@@ -107,7 +106,7 @@ function read_db($default_interval = DEFAULT_INTERVAL) {
 
     $data = array();
     //$qry = "SELECT * FROM sensorpi.summary";
-    $qry = "SELECT (75-round(avg(sensorValue),0)) as Value, Time FROM sensorpi.rawData GROUP BY UNIX_TIMESTAMP(time) DIV $default_interval ORDER BY time asc";
+    $qry = "SELECT (70-round(avg(sensorValue),0)) as Value, Time FROM sensorpi.rawData GROUP BY UNIX_TIMESTAMP(time) DIV $default_interval ORDER BY time asc";
     $res = $db->query($qry, PDO::FETCH_ASSOC);
     foreach ($res as $row) {
         $data[] = $row;

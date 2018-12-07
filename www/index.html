@@ -49,7 +49,7 @@
     var pilleChart;
     var interval = 3600;
     $("#interval").val(interval);
-    var warningLevel = 14;
+    var warningLevel = 9;
     window.chartColors = {
       red: 'rgb(255,  99, 132)',
       orange: 'rgb(255, 159,  64)',
@@ -79,7 +79,7 @@
         interval = intval;
       }
       var jsonData = $.ajax({
-          url: 'index.php?jsonaction=piller&interval=' + interval,
+          url: 'backend.php?jsonaction=piller&interval=' + interval,
           dataType: 'json',
         }).done(function (newData) {
           splitData(newData);
@@ -93,7 +93,7 @@
     function drawLineChart() {
 
       var jsonData = $.ajax({
-          url: 'index.php?jsonaction=piller&interval=' + interval,
+          url: 'backend.php?jsonaction=piller&interval=' + interval,
           dataType: 'json',
         }).done(function (rawData) {
           splitData(rawData);
@@ -133,7 +133,7 @@
                   mode: 'horizontal',
                   scaleID: 'y-axis-0',
                   value: warningLevel,
-                  borderColor: window.chartColors.red,
+                  borderColor: window.chartColors.orange,
                   borderWidth: 1.5,
                   label: {
                     enabled: false,
