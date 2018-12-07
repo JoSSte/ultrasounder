@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <title>Pille Historik</title>
     <link rel="icon" type="image/png" href="/pellets.png" />
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/jquery-3.3.1.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    
+    
     <style>
         canvas {
             -moz-user-select: none;
@@ -18,12 +23,11 @@
     <script src="js/Chart.js"></script>
     <script src="js/chartjs-plugin-annotation.js"></script>
     <script src="js/chartjs-plugin-zoom.js"></script>
-    <script src="js/jquery-3.3.1.js"></script>
 
     <div style="width:90%;margin: auto;">
         <canvas id="pilleChart"></canvas>
     </div>
-    <select name="interval" id="interval">
+    <select name="interval" class="btn btn-lg" id="interval">
         <option value="600">10 Minutter</option>
         <option value="900">15 Minutter</option>
         <option value="1800">½ Time</option>
@@ -31,8 +35,8 @@
         <option value="7200">2 Timer</option>
         <option value="10800">3 Timer</option>
     </select>
-    <input type="button" value="Opdatér" onclick="updateChartData()">
-    <input type="button" value="Nulstil Zoom" onclick="pilleChart.resetZoom()">
+    <input type="button" class="btn btn-lg" value="Opdatér" onclick="updateChartData()">
+    <input type="button" class="btn btn-lg" value="Nulstil Zoom" onclick="pilleChart.resetZoom()">
 
     <script>
     function selectItemByValue(elmnt, value) {
@@ -105,6 +109,7 @@
                 fillColor: "rgba(151,187,205,0.2)",
                 strokeColor: window.chartColors.blue,
                 borderColor: window.chartColors.graphite,
+                radius: 2,
                 borderWidth: 1,
                 fill: false,
                 label: 'Pilleniveau',
