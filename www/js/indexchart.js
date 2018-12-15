@@ -11,9 +11,9 @@ function selectItemByValue(elmnt, value) {
     var labels = [];
     var pilleChart;
     var interval = 7200;
-    $("#interval").val(interval);
-    var warningLevel = 9;
-    var emptyLevel = 5;
+    //$("#interval").val(interval);
+    var warningLevel = 10;
+    var emptyLevel = 4;
     window.chartColors = {
       red: 'rgb(255,  99, 132)',
       orange: 'rgb(255, 159,  64)',
