@@ -5,73 +5,13 @@ if (!ini_get('display_errors')) {
     ini_set('display_errors', '1');
 }
 
-define("DEFAULT_INTERVAL",3600);
+header("content-type: application/json");
+
+define("DEFAULT_INTERVAL", 3600);
 //Path to CSV
 $csvfile = "/var/www/sensors/data/distances.csv";
 //DB connection
 $db = new PDO("mysql:host:trausti.local.stumph.dk;dbname=sensorpi", "sensorread", "very1secret2password3", array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
-
-if (sizeof($_GET) > 0) {
-    if (isset($_GET["jsonaction"])) {
-        $jsonaction = filter_input(INPUT_GET, "jsonaction", FILTER_SANITIZE_STRING, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        switch ($jsonaction) {
-            case "piller":
-                header("content-type: application/json");
-                $interval = filter_input(INPUT_GET, "interval", FILTER_VALIDATE_INT, array("options" => array(    "default" => DEFAULT_INTERVAL,    "min_range" => 600)));// 10 minute minimum
-                echo json_encode(read_db($interval));
-                exit(0);
-            default:
-                echo json_encode("invalid action");
-                exit(0);
-        }
-    }
-}
-?><!DOCTYPE html>
-<html>
-    <head>
-        <link rel="icon" type="image/png" href="/pellets.png" />
-        <title>Sensor page</title>
-    </head>
-    <body>
-        <h1>Sensor page</h1>
-
-
-        <a href="<?= $_SERVER["PHP_SELF"] ?>?action=latest">Latest</a>
-        <br>
-        <a href="<?= $_SERVER["PHP_SELF"] ?>?action=dump">Dump Data</a>
-        <br>
-        <a href="/index.html">Chart</a>
-        <pre>
-<?php
-if (sizeof($_GET) > 0) {
-    if (isset($_GET["action"])) {
-        $action = filter_input(INPUT_GET, "action", FILTER_SANITIZE_STRING, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        switch ($action) {
-            case "dumpcsv":
-                dump_data("csv");
-                break;
-            case "dump":
-                dump_data("db");
-                break;
-            case "latest":
-                get_current_level();
-                break;
-            case "save":
-            case "fetch":
-
-                echo "\n\nDISABLED\n\n";
-                break;
-            /*                        case "fetch":
-              fetch_data();
-              break; */
-            default:
-                echo "invalid action:" . $action;
-                break;
-        }
-    }
-} else {
-    get_current_level();
-}
 
 function dump_data($type = "db") {
     if ($type == "csv") {
@@ -150,9 +90,22 @@ function fetch_data() {
     ssh2_scp_recv($connection, "/home/pi/src/ultrasounder/output/distances.csv", $csvfile);
     echo "File Fetched\n";
 }
-?>
-        </pre>
 
-
-    </body>
-</html>
+if (sizeof($_GET) > 0) {
+    if (isset($_GET["jsonaction"])) {
+        $jsonaction = filter_input(INPUT_GET, "jsonaction", FILTER_SANITIZE_STRING, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        switch ($jsonaction) {
+            case "piller":
+                $interval = filter_input(INPUT_GET, "interval", FILTER_VALIDATE_INT, array("options" => array("default" => DEFAULT_INTERVAL, "min_range" => 600))); // 10 minute minimum
+                echo json_encode(read_db($interval));
+                exit(0);
+            default:
+                echo json_encode(array("error_message"=>"invalid action"));
+                http_response_code (404);
+                exit(0);
+        }
+    }
+}else{
+    echo json_encode( array("error_message"=>"no action supplied"));
+    http_response_code (400);
+}
