@@ -8,6 +8,7 @@ if (!ini_get('display_errors')) {
 header("content-type: application/json");
 
 define("DEFAULT_INTERVAL", 7200);
+define("MAX_LEVEL", 70);
 //DB connection
 $db = new PDO("mysql:host:trausti.local.stumph.dk;dbname=sensorpi", "sensorread", "very1secret2password3", array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
@@ -15,7 +16,7 @@ function read_db($default_interval = DEFAULT_INTERVAL) {
     global $db;
 
     $data = array();
-    $qry = "SELECT (70-round(avg(sensorValue),0)) as Value, Time FROM sensorpi.rawData GROUP BY UNIX_TIMESTAMP(time) DIV $default_interval ORDER BY time asc";
+    $qry = "SELECT (".MAX_LEVEL." - ROUND(AVG(sensorValue),0)) AS Value, Time FROM sensorpi.rawData GROUP BY UNIX_TIMESTAMP(time) DIV $default_interval ORDER BY time ASC";
     $res = $db->query($qry, PDO::FETCH_ASSOC);
     foreach ($res as $row) {
         $data[] = $row;
@@ -27,7 +28,7 @@ function get_current_level() {
     global $db;
 
     //$qry = "SELECT * FROM sensorpi.summary order by Time Desc limit 0,1";
-    $qry = " select sensorvalue as Value, time as Time from sensorpi.rawData order by time desc limit 0,1";
+    $qry = "SELECT sensorvalue AS Value, time AS Time FROM sensorpi.rawData ORDER BY time DESC LIMIT 0,1";
     $res = $db->query($qry, PDO::FETCH_ASSOC);
     foreach ($res as $row) {
         echo "Current level: [" . $row["Value"] . "] @ " . $row["Time"];
@@ -57,7 +58,7 @@ function get_current_level() {
                 echo json_encode(read_db($interval));
                 exit(0);
             default:
-                echo json_encode(array("error_message"=>"invalid action or no action supplied"));
+                echo json_encode(array("error_message"=>"Invalid action or no action requested"));
                 http_response_code (400);
-                exit(0);
+                exit(1);
         }
