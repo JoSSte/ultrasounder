@@ -54,6 +54,7 @@
     var interval = 3600;
     $("#interval").val(interval);
     var warningLevel = 9;
+    var emptyLevel = 5;
     window.chartColors = {
       red: 'rgb(255,  99, 132)',
       orange: 'rgb(255, 159,  64)',
@@ -133,7 +134,8 @@
               intersect: true
             },
             annotation: {
-              annotations: [{
+              annotations: [
+                {
                   type: 'line',
                   mode: 'horizontal',
                   scaleID: 'y-axis-0',
@@ -141,10 +143,24 @@
                   borderColor: window.chartColors.orange,
                   borderWidth: 1.5,
                   label: {
-                    enabled: false,
-                    content: 'Test label'
+                    enabled: true,
+                    content: 'Refill',
+                    backgroundColor: window.chartColors.orange
                   }
-                }
+                },
+                {
+                  type: 'line',
+                  mode: 'horizontal',
+                  scaleID: 'y-axis-0',
+                  value: emptyLevel,
+                  borderColor: window.chartColors.red,
+                  borderWidth: 1.5,
+                  label: {
+                    enabled: true,
+                    content: 'Empty',
+		    backgroundColor: window.chartColors.red
+                  }
+                },
               ]
             },
             zoom: {
