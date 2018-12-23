@@ -21,7 +21,8 @@ window.chartColors = {
     green: 'rgb( 75, 192, 192)',
     blue: 'rgb( 54, 162, 235)',
     purple: 'rgb(153, 102, 255)',
-    grey: 'rgb(231, 233, 237)',
+    silver: 'rgb(230, 230, 230)',
+    grey: 'rgb( 90, 90, 90)',
     black: 'rgb(  0,   0,   0)',
     graphite: 'rgb( 50,  50,  50)'
 };
@@ -56,7 +57,7 @@ function drawLineChart() {
         var pilleData = {
             //labels: data.labels,
             datasets: [{
-                    fillColor: window.chartColors.graphite,
+                    pointHoverBackgroundColor: window.chartColors.grey,
                     strokeColor: window.chartColors.grey,
                     borderColor: window.chartColors.graphite,
                     pointRadius: 0,
@@ -67,10 +68,10 @@ function drawLineChart() {
 
                 },
                 {
-                    fillColor: window.chartColors.red,
+                    pointHoverBackgroundColor: window.chartColors.red,
                     strokeColor: window.chartColors.green,
                     borderColor: window.chartColors.red,
-                    radius: 5,
+                    radius: 3,
                     borderWidth: 2,
                     showLine: false,
                     fill: false,
@@ -85,7 +86,7 @@ function drawLineChart() {
             responsive: true,
             title: {
                 display: true,
-                text: 'Pilleniveau i beholder'
+                text: 'Pilleniveau (%)'
             },
             legend: {
                 display: false
@@ -147,15 +148,15 @@ function drawLineChart() {
                 // Function called once zooming is completed
                 // Useful for dynamic data loading
                 onZoom: function () {
-                 console.log('I was zoomed!!!');
-                 } 
+                    console.log('I was zoomed!!!');
+                }
             },
             scales: {
                 yAxes: [{
                         ticks: {
                             beginAtZero: true,
                             stepSize: 10,
-                            suggestedMax: 110
+                            suggestedMax: 100
                         }
                     }
                 ],
