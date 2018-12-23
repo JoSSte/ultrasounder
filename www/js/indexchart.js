@@ -10,7 +10,7 @@ function selectItemByValue(elmnt, value) {
 
 var pilleChart;
 var urlPilleData = 'backend.php?jsonaction=pilledata&graphable=true';
-var interval = 7200;
+var interval = 600;
 //$("#interval").val(interval);
 var warningLevel = 10;
 var emptyLevel = 4;
@@ -59,7 +59,7 @@ function drawLineChart() {
                     fillColor: window.chartColors.graphite,
                     strokeColor: window.chartColors.grey,
                     borderColor: window.chartColors.graphite,
-                    radius: 2,
+                    pointRadius: 0,
                     borderWidth: 1,
                     fill: false,
                     label: 'Pilleniveau',
