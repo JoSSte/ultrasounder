@@ -56,7 +56,7 @@ function getPeaks($data): array {
         //$delta_next = abs($data[$i][$valueLabel] - $data[$i + 1][$valueLabel]);
         if ($data[$i][$valueLabel] >= $data[$i + 1][$valueLabel] && $data[$i][$valueLabel] >= $data[$i - 1][$valueLabel] && $data[$i][$valueLabel] > 90
         ) {
-            array_push($refillData, array($valueLabel => round($data[$i][$valueLabel]), $timeLabel => $data[$i][$timeLabel]));
+            array_push($refillData, array($valueLabel => ($data[$i][$valueLabel]), $timeLabel => $data[$i][$timeLabel]));
         }
     }
 
@@ -84,7 +84,7 @@ function normalizeData($data) {
         }
     }
     foreach ($data as $entry) {
-        $normalizedData[] = array($valueLabel => (($entry[$valueLabel] - $min) / ($max - $min) * 100), $timeLabel => $entry[$timeLabel]);
+        $normalizedData[] = array($valueLabel => round(($entry[$valueLabel] - $min) / ($max - $min) * 100, 2), $timeLabel => $entry[$timeLabel]);
     }
 
     return $normalizedData;
