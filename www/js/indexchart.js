@@ -12,7 +12,7 @@ var pilleChart;
 var urlPilleData = 'backend.php?jsonaction=pilledata&graphable=true';
 var interval = 600;
 //$("#interval").val(interval);
-var warningLevel = 10;
+var warningLevel = 11;
 var emptyLevel = 4;
 window.chartColors = {
     red: 'rgb(255,  99, 132)',
@@ -75,7 +75,7 @@ function drawLineChart() {
                     borderWidth: 2,
                     showLine: false,
                     fill: false,
-                    label: 'Refills',
+                    label: 'POI',
                     data: rawData.refills
 
                 }

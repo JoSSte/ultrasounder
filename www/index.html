@@ -1,44 +1,47 @@
 <!doctype html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <title>Pille Historik</title>
-    <link rel="icon" type="image/png" href="/pellets.png" />
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    <script src="js/jquery-3.3.1.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <style>
-        canvas {
-            -moz-user-select: none;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-        }
-    </style>
-</head>
-<body>
-    <script src="js/moment.min.js"></script>
-    <script src="js/Chart.js"></script>
-    <script src="js/chartjs-plugin-annotation.js"></script>
-    <!--
-    <script src="js/chartjs-plugin-zoom.js"></script>
-    -->
+    <head>
+        <meta charset="UTF-8">
+        <title>Pille Historik</title>
+        <link rel="icon" type="image/png" href="/pellets.png" />
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <script src="js/jquery-3.3.1.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <style>
+            canvas {
+                -moz-user-select: none;
+                -webkit-user-select: none;
+                -ms-user-select: none;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="js/moment.min.js"></script>
+        <script src="js/Chart.js"></script>
+        <script src="js/chartjs-plugin-annotation.js"></script>
+        <!--
+        <script src="js/chartjs-plugin-zoom.js"></script>
+        -->
 
-    <div style="width:90%;margin: auto;">
-        <canvas id="pilleChart"></canvas>
-    </div>
-    <!--
-    <select name="interval" class="btn btn-lg" id="interval">
-        <option value="600">10 Minutter</option>
-        <option value="900">15 Minutter</option>
-        <option value="1800">½ Time</option>
-        <option value="3600">1 Time</option>
-        <option value="7200">2 Timer</option>
-        <option value="10800">3 Timer</option>
-    </select> 
-    <input type="button" class="btn btn-lg" value="Opdatér" onclick="updateChartData()">
-    <input type="button" class="btn btn-lg" value="Nulstil Zoom" onclick="pilleChart.resetZoom()">
-    -->
-    <script src="js/indexchart.js"></script>
-</body>
+        <div style="width:90%;margin: auto;">
+            <canvas id="pilleChart"></canvas>
+        </div>
+        <div id="pilleInfo">
+
+        </div>
+        <!--
+        <select name="interval" class="btn btn-lg" id="interval">
+            <option value="600">10 Minutter</option>
+            <option value="900">15 Minutter</option>
+            <option value="1800">½ Time</option>
+            <option value="3600">1 Time</option>
+            <option value="7200">2 Timer</option>
+            <option value="10800">3 Timer</option>
+        </select> 
+        <input type="button" class="btn btn-lg" value="Opdatér" onclick="updateChartData()">
+        <input type="button" class="btn btn-lg" value="Nulstil Zoom" onclick="pilleChart.resetZoom()">
+        -->
+        <script src="js/indexchart.js"></script>
+    </body>
 
 </html>

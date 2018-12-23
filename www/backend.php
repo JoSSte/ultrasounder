@@ -50,13 +50,26 @@ function getPeaks($data): array {
     global $valueLabel;
     global $timeLabel;
     $refillData = array();
+    define("MAX_DATAPOINTS_BETWEEN_PEAKS", 10);
+    $dataPointSinceLastPeak = 99;
+    $dataPointSinceLastTrough = 99;
 
     for ($i = 1; $i < count($data) - 1; $i++) {
-        //$delta_prev = abs($data[$i][$valueLabel] - $data[$i - 1][$valueLabel]);
-        //$delta_next = abs($data[$i][$valueLabel] - $data[$i + 1][$valueLabel]);
-        if ($data[$i][$valueLabel] >= $data[$i + 1][$valueLabel] && $data[$i][$valueLabel] >= $data[$i - 1][$valueLabel] && $data[$i][$valueLabel] > 90
-        ) {
-            array_push($refillData, array($valueLabel => ($data[$i][$valueLabel]), $timeLabel => $data[$i][$timeLabel]));
+        $dataPointSinceLastPeak++;
+        $dataPointSinceLastTrough++;
+        if ($data[$i][$valueLabel] >= $data[$i + 1][$valueLabel] && $data[$i][$valueLabel] >= $data[$i - 1][$valueLabel] && $data[$i][$valueLabel] > 90) {
+            //HACK: keep first peak within 10 datapoints
+            if ($dataPointSinceLastPeak > MAX_DATAPOINTS_BETWEEN_PEAKS) {
+                array_push($refillData, array($valueLabel => ($data[$i][$valueLabel]), $timeLabel => $data[$i][$timeLabel], "type" => "peak")); //, "dataPointsSinceLastPeak" => $dataPointSinceLastPeak));
+                $dataPointSinceLastPeak = 0;
+            }
+        }
+        if ($data[$i][$valueLabel] <= $data[$i + 1][$valueLabel] && $data[$i][$valueLabel] <= $data[$i - 1][$valueLabel] && $data[$i][$valueLabel] < 11) {
+            //HACK: keep first peak within 10 datapoints
+            if ($dataPointSinceLastTrough > MAX_DATAPOINTS_BETWEEN_PEAKS) {
+                array_push($refillData, array($valueLabel => ($data[$i][$valueLabel]), $timeLabel => $data[$i][$timeLabel], "type" => "trough")); //, "dataPointSinceLastTrough" => $dataPointSinceLastTrough));
+                $dataPointSinceLastTrough = 0;
+            }
         }
     }
 
