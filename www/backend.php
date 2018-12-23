@@ -8,7 +8,7 @@ if (!ini_get('display_errors')) {
 
 header("content-type: application/json");
 
-define("DEFAULT_INTERVAL", 7200);
+define("DEFAULT_INTERVAL", 3600);
 define("MAX_LEVEL", 70);
 
 $jsonaction = filter_input(INPUT_GET, "jsonaction", FILTER_SANITIZE_STRING, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
@@ -36,7 +36,7 @@ function readDB($default_interval = DEFAULT_INTERVAL) {
     $qry = "SELECT (" . MAX_LEVEL . " - ROUND(AVG(sensorValue),0)) AS $valueLabel, Time as $timeLabel FROM sensorpi.rawData GROUP BY UNIX_TIMESTAMP(time) DIV $default_interval ORDER BY time ASC";
     $res = $db->query($qry, PDO::FETCH_ASSOC);
     foreach ($res as $row) {
-        $data[] = $row;
+        $data[] = array($valueLabel => intval($row[$valueLabel]), $timeLabel => $row[$timeLabel]);
     }
     return $data;
 }
@@ -46,7 +46,7 @@ function readDB($default_interval = DEFAULT_INTERVAL) {
  * TODO: consider https://stackoverflow.com/questions/22583391/peak-signal-detection-in-realtime-timeseries-data/22640362#22640362
  * @return array
  */
-function getRefills($data) {
+function getPeaks($data): array {
     global $valueLabel;
     global $timeLabel;
     $refillData = array();
@@ -54,9 +54,9 @@ function getRefills($data) {
     for ($i = 1; $i < count($data) - 1; $i++) {
         //$delta_prev = abs($data[$i][$valueLabel] - $data[$i - 1][$valueLabel]);
         //$delta_next = abs($data[$i][$valueLabel] - $data[$i + 1][$valueLabel]);
-        if ($data[$i][$valueLabel] >= $data[$i + 1][$valueLabel] && $data[$i][$valueLabel] >= $data[$i - 1][$valueLabel] && $data[$i][$valueLabel] > 55
+        if ($data[$i][$valueLabel] >= $data[$i + 1][$valueLabel] && $data[$i][$valueLabel] >= $data[$i - 1][$valueLabel] && $data[$i][$valueLabel] > 90
         ) {
-            array_push($refillData, $data[$i]);
+            array_push($refillData, array($valueLabel => round($data[$i][$valueLabel]), $timeLabel => $data[$i][$timeLabel]));
         }
     }
 
@@ -84,13 +84,35 @@ function normalizeData($data) {
         }
     }
     foreach ($data as $entry) {
-        $normalizedData[] = array($valueLabel => round(($entry[$valueLabel] - $min) / ($max - $min) * 100), $timeLabel => $entry[$timeLabel]);
+        $normalizedData[] = array($valueLabel => (($entry[$valueLabel] - $min) / ($max - $min) * 100), $timeLabel => $entry[$timeLabel]);
     }
 
     return $normalizedData;
 }
 
+/**
+ * exponentialMovingAverage Smoothing
+ * @param array $data
+ * @param int $n timeperiod
+ * @return array
+ */
+function smoothe(array $data, int $n): array {
+    global $valueLabel;
+    global $timeLabel;
+    $m = count($data);
+    $α = 2 / ($n + 1);
+    $EMA = array();
 
+    // Start off by seeding with the first data point
+    $EMA[] = array($valueLabel => $data[0][$valueLabel], $timeLabel => $data[0][$timeLabel]);
+
+    // Each day after: EMAtoday = α⋅xtoday + (1-α)EMAyesterday
+    for ($i = 1; $i < $m; $i++) {
+        $EMA[] = array($valueLabel => (($α * $data[$i][$valueLabel]) + ((1 - $α) * $EMA[$i - 1][$valueLabel])), $timeLabel => $data[$i][$timeLabel]);
+    }
+
+    return $EMA;
+}
 
 function get_current_level() {
     global $db;
@@ -123,14 +145,22 @@ function get_current_level() {
 
 switch ($jsonaction) {
     case "pilledata":
-        $data = normalizeData(readDB($interval));
-        echo json_encode(array("data" => $data, "refills" => getRefills($data)));
+        $data = normalizeData(smoothe(readDB($interval), 6));
+        echo json_encode(array("data" => $data, "refills" => getPeaks($data)));
         exit(0);
     case "piller":
         $data = readDB($interval);
         if ($normalized) {
             $data = normalizeData($data);
         }
+        echo json_encode($data);
+        exit(0);
+    case "smoothed":
+        $data = smoothe(readDB($interval), 20);
+        echo json_encode($data);
+        exit(0);
+    case "raw":
+        $data = readDB($interval);
         echo json_encode($data);
         exit(0);
     default:
