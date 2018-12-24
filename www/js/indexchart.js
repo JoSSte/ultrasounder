@@ -182,10 +182,13 @@ function drawLineChart() {
         analyseData(rawData.refills);
     });
 }
+function dec2(num) {
+    return Math.round(num * 100) / 100;
+
+}
+
 function analyseData(data) {
-    console.log(data);
     var lastPeak;
-    var unit = "hours";
     var dateFormat = "MM-DD-YYYY";
     var currentEstRate = 0;
     var remainingTime = 0;
@@ -194,31 +197,30 @@ function analyseData(data) {
             lastPeak = moment(data[i].x);
         } else if (data[i].type === "trough") {
             var trough = moment(data[i].x);
-            var diff = trough.diff(lastPeak, unit);
-            var currRate = Math.round((100 / diff) * 100) / 100;
+            var diff = moment.duration(trough.diff(lastPeak));
+            var currRate = dec2((100 / diff.asHours()));
             //TODO : calculate mean rate
-            $("#useList").append("<tr><td>" + lastPeak.format(dateFormat) + "</td><td>" + trough.format(dateFormat) + "</td><td>" + diff + " " + unit + "</td><td colspan=3>" + currRate + "</td></tr>");
+            $("#useList").append("<tr><td>" + lastPeak.format(dateFormat) + "</td><td>" + trough.format(dateFormat) + "</td><td>" + dec2(diff.asHours()) + " hours | " + dec2(diff.asDays()) + " days</td><td colspan=3>" + currRate + "</td></tr>");
         } else if (data[i].type === "tail") {
             var tail = moment(data[i].x);
-            var diff = tail.diff(lastPeak, unit);
+            var diff = moment.duration(tail.diff(lastPeak));
             var highlight = "table-info";
             var currentLevel = data[i].y;
             if (currentLevel < warningLevel) {
                 highlight = "table-warning";
             }
-            currentEstRate = Math.round(((100 - currentLevel) / diff) * 100) / 100;
-            remainingTime = Math.round(currentLevel / currentEstRate * 100) / 100;
-            $("#useList").append("<tr class=\"" + highlight + "\"><td>" + lastPeak.format(dateFormat) + "</td><td>" + tail.format(dateFormat) + "</td><td>" + diff + " " + unit + "</td><td>" + currentEstRate + "</td></tr>");
+            currentEstRate = dec2((100 - currentLevel) / diff.asHours());
+            remainingTime = dec2(currentLevel / currentEstRate);
+            $("#useList").append("<tr class=\"" + highlight + "\"><td>" + lastPeak.format(dateFormat) + "</td><td>" + tail.format(dateFormat) + "</td><td>" + dec2(diff.asHours()) + " hours | " + dec2(diff.asDays()) + " days</td><td>" + currentEstRate + "</td></tr>");
             $("#pLvl").append(currentLevel);
-            $("#remainder").append(remainingTime + " " + unit);
+            $("#remainder").append(remainingTime + " hours | " + dec2(remainingTime % 24) + " days");
             //TODO: fiddle with the remaining time stuff
-            if (currentLevel < warningLevel || moment().format(HH) > 22 && remainingTime < 12) {
+            if (currentLevel < warningLevel || moment().format("HH") > 22 && remainingTime < 12) {
                 $('#pilleAlert').addClass('alert-danger').removeClass('alert-dark');
             }
         }
 
     }
-
 }
 
 drawLineChart();
