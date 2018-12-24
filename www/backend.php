@@ -51,25 +51,31 @@ function getPeaks($data): array {
     global $timeLabel;
     $refillData = array();
     define("MAX_DATAPOINTS_BETWEEN_PEAKS", 10);
+    define("MAX_TROUGH", 30);
+    define("MIN_PEAK", 90);
     $dataPointSinceLastPeak = 99;
     $dataPointSinceLastTrough = 99;
 
     for ($i = 1; $i < count($data) - 1; $i++) {
         $dataPointSinceLastPeak++;
         $dataPointSinceLastTrough++;
-        if ($data[$i][$valueLabel] >= $data[$i + 1][$valueLabel] && $data[$i][$valueLabel] >= $data[$i - 1][$valueLabel] && $data[$i][$valueLabel] > 90) {
+        if ($data[$i][$valueLabel] >= $data[$i + 1][$valueLabel] && $data[$i][$valueLabel] >= $data[$i - 1][$valueLabel] && $data[$i][$valueLabel] > MIN_PEAK) {
             //HACK: keep first peak within 10 datapoints
             if ($dataPointSinceLastPeak > MAX_DATAPOINTS_BETWEEN_PEAKS) {
                 array_push($refillData, array($valueLabel => ($data[$i][$valueLabel]), $timeLabel => $data[$i][$timeLabel], "type" => "peak")); //, "dataPointsSinceLastPeak" => $dataPointSinceLastPeak));
                 $dataPointSinceLastPeak = 0;
             }
         }
-        if ($data[$i][$valueLabel] <= $data[$i + 1][$valueLabel] && $data[$i][$valueLabel] <= $data[$i - 1][$valueLabel] && $data[$i][$valueLabel] < 11) {
+        if ($data[$i][$valueLabel] <= $data[$i + 1][$valueLabel] && $data[$i][$valueLabel] <= $data[$i - 1][$valueLabel] && $data[$i][$valueLabel] < MAX_TROUGH) {
             //HACK: keep first peak within 10 datapoints
             if ($dataPointSinceLastTrough > MAX_DATAPOINTS_BETWEEN_PEAKS) {
                 array_push($refillData, array($valueLabel => ($data[$i][$valueLabel]), $timeLabel => $data[$i][$timeLabel], "type" => "trough")); //, "dataPointSinceLastTrough" => $dataPointSinceLastTrough));
                 $dataPointSinceLastTrough = 0;
             }
+        }
+        //create last point as tail
+        if($i == count($data) - 2){
+            array_push($refillData, array($valueLabel => ($data[$i+1][$valueLabel]), $timeLabel => $data[$i+1][$timeLabel], "type" => "tail")); //, "dataPointSinceLastTrough" => $dataPointSinceLastTrough));
         }
     }
 
