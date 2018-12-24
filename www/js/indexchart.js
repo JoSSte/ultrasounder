@@ -195,12 +195,12 @@ function analyseData(data) {
     for (var i = 0; i < data.length; i++) {
         if (data[i].type === "peak") {
             lastPeak = moment(data[i].x);
-        } else if (data[i].type === "trough") {
+        } else if (data[i].type === "trough") {//TODO: consider using diff between trough and next peak as trough since smoothing has moved some data points.
             var trough = moment(data[i].x);
             var diff = moment.duration(trough.diff(lastPeak));
             var currRate = dec2((100 / diff.asHours()));
             //TODO : calculate mean rate
-            $("#useList").append("<tr><td>" + lastPeak.format(dateFormat) + "</td><td>" + trough.format(dateFormat) + "</td><td>" + dec2(diff.asHours()) + " hours | " + dec2(diff.asDays()) + " days</td><td colspan=3>" + currRate + "</td></tr>");
+            $("#useList").prepend("<tr><td>" + lastPeak.format(dateFormat) + "</td><td>" + trough.format(dateFormat) + "</td><td>" + dec2(diff.asHours()) + " hours | " + dec2(diff.asDays()) + " days</td><td colspan=3>" + currRate + "</td></tr>");
         } else if (data[i].type === "tail") {
             var tail = moment(data[i].x);
             var diff = moment.duration(tail.diff(lastPeak));
@@ -211,7 +211,7 @@ function analyseData(data) {
             }
             currentEstRate = dec2((100 - currentLevel) / diff.asHours());
             remainingTime = dec2(currentLevel / currentEstRate);
-            $("#useList").append("<tr class=\"" + highlight + "\"><td>" + lastPeak.format(dateFormat) + "</td><td>" + tail.format(dateFormat) + "</td><td>" + dec2(diff.asHours()) + " hours | " + dec2(diff.asDays()) + " days</td><td>" + currentEstRate + "</td></tr>");
+            $("#useList").prepend("<tr class=\"" + highlight + "\"><td>" + lastPeak.format(dateFormat) + "</td><td>" + tail.format(dateFormat) + "</td><td>" + dec2(diff.asHours()) + " hours | " + dec2(diff.asDays()) + " days</td><td>" + currentEstRate + "</td></tr>");
             $("#pLvl").append(currentLevel);
             $("#remainder").append(remainingTime + " hours | " + dec2(remainingTime % 24) + " days");
             //TODO: fiddle with the remaining time stuff
