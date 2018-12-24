@@ -63,7 +63,7 @@ function drawLineChart() {
                     pointRadius: 0,
                     borderWidth: 1,
                     fill: false,
-                    label: 'Pilleniveau',
+                    label: 'Pellet Level',
                     data: rawData.data
 
                 },
@@ -86,7 +86,7 @@ function drawLineChart() {
             responsive: true,
             title: {
                 display: true,
-                text: 'Pilleniveau (%)'
+                text: 'Pellet Level (%)'
             },
             legend: {
                 display: false
@@ -125,32 +125,34 @@ function drawLineChart() {
                     }
                 ]
             },
-            zoom: {
-                // Boolean to enable zooming
-                enabled: true,
-
-                // Enable drag-to-zoom behavior
-                drag: true,
-
-                // Zooming directions. Remove the appropriate direction to disable
-                // Eg. 'y' would only allow zooming in the y direction
-                mode: 'xy',
-                rangeMin: {
-                    // Format of min zoom range depends on scale type
-                    x: null,
-                    y: null
-                },
-                rangeMax: {
-                    // Format of max zoom range depends on scale type
-                    x: 0,
-                    y: 100
-                },
-                // Function called once zooming is completed
-                // Useful for dynamic data loading
-                onZoom: function () {
-                    console.log('I was zoomed!!!');
-                }
-            },
+            /*
+             zoom: {
+             // Boolean to enable zooming
+             enabled: true,
+             
+             // Enable drag-to-zoom behavior
+             drag: true,
+             
+             // Zooming directions. Remove the appropriate direction to disable
+             // Eg. 'y' would only allow zooming in the y direction
+             mode: 'xy',
+             rangeMin: {
+             // Format of min zoom range depends on scale type
+             x: null,
+             y: null
+             },
+             rangeMax: {
+             // Format of max zoom range depends on scale type
+             x: 0,
+             y: 100
+             },
+             // Function called once zooming is completed
+             // Useful for dynamic data loading
+             onZoom: function () {
+             console.log('I was zoomed!!!');
+             }
+             },
+             */
             scales: {
                 yAxes: [{
                         ticks: {
@@ -177,7 +179,46 @@ function drawLineChart() {
             data: pilleData,
             options: options
         });
+        analyseData(rawData.refills);
     });
+}
+function analyseData(data) {
+    console.log(data);
+    var lastPeak;
+    var unit = "hours";
+    var dateFormat = "MM-DD-YYYY";
+    var currentEstRate = 0;
+    var remainingTime = 0;
+    for (var i = 0; i < data.length; i++) {
+        if (data[i].type === "peak") {
+            lastPeak = moment(data[i].x);
+        } else if (data[i].type === "trough") {
+            var trough = moment(data[i].x);
+            var diff = trough.diff(lastPeak, unit);
+            var currRate = Math.round((100 / diff) * 100) / 100;
+            //TODO : calculate mean rate
+            $("#useList").append("<tr><td>" + lastPeak.format(dateFormat) + "</td><td>" + trough.format(dateFormat) + "</td><td>" + diff + " " + unit + "</td><td colspan=3>" + currRate + "</td></tr>");
+        } else if (data[i].type === "tail") {
+            var tail = moment(data[i].x);
+            var diff = tail.diff(lastPeak, unit);
+            var highlight = "table-info";
+            var currentLevel = data[i].y;
+            if (currentLevel < warningLevel) {
+                highlight = "table-warning";
+            }
+            currentEstRate = Math.round(((100 - currentLevel) / diff) * 100) / 100;
+            remainingTime = Math.round(currentLevel / currentEstRate * 100) / 100;
+            $("#useList").append("<tr class=\"" + highlight + "\"><td>" + lastPeak.format(dateFormat) + "</td><td>" + tail.format(dateFormat) + "</td><td>" + diff + " " + unit + "</td><td>" + currentEstRate + "</td></tr>");
+            $("#pLvl").append(currentLevel);
+            $("#remainder").append(remainingTime + " " + unit);
+            //TODO: fiddle with the remaining time stuff
+            if (currentLevel < warningLevel || moment().format(HH) > 22 && remainingTime < 12) {
+                $('#pilleAlert').addClass('alert-danger').removeClass('alert-dark');
+            }
+        }
+
+    }
+
 }
 
 drawLineChart();
