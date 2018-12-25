@@ -213,7 +213,7 @@ function analyseData(data) {
             remainingTime = dec2(currentLevel / currentEstRate);
             $("#useList").prepend("<tr class=\"" + highlight + "\"><td>" + lastPeak.format(dateFormat) + "</td><td>" + tail.format(dateFormat) + "</td><td>" + dec2(diff.asHours()) + " hours | " + dec2(diff.asDays()) + " days</td><td>" + currentEstRate + "</td></tr>");
             $("#pLvl").append(currentLevel);
-            $("#remainder").append(remainingTime + " hours | " + dec2(remainingTime % 24) + " days");
+            $("#remainder").append(remainingTime + " hours | " + dec2(remainingTime / 24) + " days");
             //TODO: fiddle with the remaining time stuff
             if (currentLevel < warningLevel || moment().format("HH") > 22 && remainingTime < 12) {
                 $('#pilleAlert').addClass('alert-danger').removeClass('alert-dark');
