@@ -22,14 +22,15 @@
         <!--
         <script src="js/chartjs-plugin-zoom.js"></script>
         -->
-
-        <div style="width:90%;margin: auto;">
+        <div id="pilleAlert" class="alert alert-dark" role="alert">
+            <strong>Pellet Level:</strong> <span id="pLvl"></span>%  <strong>Estimated Time Left:</strong> <span id="remainder"></span>
+        </div>
+        
+        <div style="width:100%;margin: auto;">
             <canvas id="pilleChart"></canvas>
         </div>
         <div id="pilleInfo">
-            <div id="pilleAlert" class="alert alert-dark" role="alert">
-                <strong>Pellet Level:</strong> <span id="pLvl"></span>%  <strong>Estimated Time Left:</strong> <span id="remainder"></span>
-            </div>
+
             <table class="table table-sm table-striped">
                 <thead class="thead-dark">
                     <tr><th>From</th><th>To</th><th>Elapsed</th><th>Rate (% per hour)</th></tr>
